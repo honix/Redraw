@@ -35,6 +35,20 @@ tool: context [
 	size: 25
 ]
 
+update-preview: does [
+	preview/draw: replaces copy [
+		pen        a1
+		fill-pen   off 
+		line-join  round
+		line-cap   round
+		line-width a2 
+		spline 30x30 50x20 100x40 120x30
+	] [a1 (tool/color) a2 (tool/size)]
+	
+	show preview
+	print tool/color
+]
+
 canvas: layout [
 	title "Redraw"
 
@@ -42,6 +56,11 @@ canvas: layout [
 	ib: image buffer
 
 		on-down [append line-array event/offset]
+
+		on-alt-down [
+			tool/color: pick buffer event/offset
+			update-preview
+		]
 
 		on-up [
 			line-array: copy []
@@ -77,6 +96,12 @@ canvas: layout [
 	below center
 	preview: base 150x60
 	pallete: image pallete-buffer 
+		
+		on-down [
+			tool/color: pick pallete-buffer event/offset
+			update-preview
+		]
+
 
 		all-over
 		on-over [switch first event/flags [
@@ -115,21 +140,6 @@ help: layout [
 	]
 
 	button "Close" [unview self]
-]
-
-
-update-preview: does [
-	preview/draw: replaces copy [
-		pen	       a1
-		fill-pen   off 
-		line-join  round
-		line-cap   round
-		line-width a2 
-		spline 30x30 50x20 100x40 120x30
-	] [a1 (tool/color) a2 (tool/size)]
-	
-	show preview
-	print tool/color
 ]
 
 view canvas
