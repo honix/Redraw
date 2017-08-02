@@ -13,8 +13,6 @@ replaces: func [block reps] [
 	block
 ]
 
-transparent: transparent - 0.0.0.1	 ; what the heck?!
-
 system/view/auto-sync?: no
 
 pen-buffer-settings: reduce [500x500 transparent]
@@ -33,7 +31,6 @@ canvas: layout [
 
 	at 10x10 
 	ib: image buffer
-	pb: image pen-buffer
 
 		on-down [append line-array event/offset]
 
@@ -65,6 +62,8 @@ canvas: layout [
 				]
 			]
 		]
+
+	pb: image pen-buffer
 
 	below center
 	pallet: base 150x60 
