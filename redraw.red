@@ -15,6 +15,15 @@ replaces: func [block reps] [
 
 system/view/auto-sync?: no
 
+pallete-buffer: make image! 150x150
+draw pallete-buffer [
+	pen off
+	fill-pen linear red orange yellow green aqua blue purple
+	box 0x0 150x150 
+	fill-pen linear white transparent black 0x0 0x150
+	box 0x0 150x150
+]
+
 pen-buffer-settings: reduce [500x500 transparent]
 pen-buffer: make image! pen-buffer-settings
 buffer:	 make image! [500x500 100.100.100]
@@ -58,7 +67,7 @@ canvas: layout [
 				]
 				alt-down [
 					tool/color: pick buffer event/offset
-					update-pallet
+					update-preview
 				]
 			]
 		]
@@ -66,34 +75,35 @@ canvas: layout [
 	pb: image pen-buffer
 
 	below center
-	pallet: base 150x60 
+	preview: base 150x60
+	pallete: image pallete-buffer 
 
-	style label: text 60x12 center 
+		all-over
+		on-over [switch first event/flags [
+				down [
+					tool/color: pick pallete-buffer event/offset
+					update-preview
+				]
+			]
+		]
+
+	style label: text 60x14 center 
 	style c-slider: slider all-over on-over [
-		if find event/flags 'down [update-pallet]
+		if find event/flags 'down [update-preview]
 	]
 
-	label "RED" red
-	c-slider data 0.4
-		react [tool/color/1: to-integer face/data * 255]
-	label "GREEN" green
-	c-slider data 0.2
-		react [tool/color/2: to-integer face/data * 255]
-	label "BLUE" blue
-	c-slider data 0.2
-		react [tool/color/3: to-integer face/data * 255]
-	label "ALPHA" gray
+	label "ALPHA"
 	c-slider data 0.2
 		react [tool/color/4: to-integer face/data * 255]
 
 	base 120x1
 
-	label "SIZE" gray
+	label "SIZE"
 	c-slider data 0.2 react [tool/size: to-integer face/data * 100]
 
 	button "HELP" [view help]
 
-	do [update-pallet]
+	do [update-preview]
 ]
 
 help: layout [
@@ -108,8 +118,8 @@ help: layout [
 ]
 
 
-update-pallet: does [
-	pallet/draw: replaces copy [
+update-preview: does [
+	preview/draw: replaces copy [
 		pen	       a1
 		fill-pen   off 
 		line-join  round
@@ -118,7 +128,7 @@ update-pallet: does [
 		spline 30x30 50x20 100x40 120x30
 	] [a1 (tool/color) a2 (tool/size)]
 	
-	show pallet
+	show preview
 	print tool/color
 ]
 
