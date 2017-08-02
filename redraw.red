@@ -50,8 +50,8 @@ canvas: layout [
 					append line-array event/offset
 					pen-buffer/argb: transparent
 					draw pen-buffer replaces copy [
-						pen		a1
-						fill-pen   a1
+						pen	       a1
+						fill-pen   off
 						line-join  round
 						line-cap   round
 						line-width a2 
@@ -67,7 +67,7 @@ canvas: layout [
 		]
 
 	below center
-	pallet: base 150x50
+	pallet: base 150x60 
 
 	style label: text 60x12 center 
 	style c-slider: slider all-over on-over [
@@ -90,9 +90,11 @@ canvas: layout [
 	base 120x1
 
 	label "SIZE" gray
-	slider data 0.2 react [tool/size: to-integer face/data * 100]
+	c-slider data 0.2 react [tool/size: to-integer face/data * 100]
 
 	button "HELP" [view help]
+
+	do [update-pallet]
 ]
 
 help: layout [
@@ -108,7 +110,15 @@ help: layout [
 
 
 update-pallet: does [
-	pallet/color: tool/color
+	pallet/draw: replaces copy [
+		pen	       a1
+		fill-pen   off 
+		line-join  round
+		line-cap   round
+		line-width a2 
+		spline 30x30 50x20 100x40 120x30
+	] [a1 (tool/color) a2 (tool/size)]
+	
 	show pallet
 	print tool/color
 ]
