@@ -5,14 +5,6 @@ Red [
 	Needs: 'View
 ]
 
-replaces: func [block reps] [
-	until [
-		block: replace/all block first reps do first reps: next reps
-		empty? reps: next reps
-	]
-	block
-]
-
 system/view/auto-sync?: no
 
 pallete-buffer: make image! 150x150
@@ -36,14 +28,14 @@ tool: context [
 ]
 
 update-preview: does [
-	preview/draw: replaces copy [
-		pen        a1
+	preview/draw: compose [
+		pen        (tool/color)
 		fill-pen   off 
 		line-join  round
 		line-cap   round
-		line-width a2 
+		line-width (tool/size) 
 		spline 30x30 50x20 100x40 120x30
-	] [a1 (tool/color) a2 (tool/size)]
+	]
 	
 	show preview
 	print tool/color
@@ -74,14 +66,14 @@ canvas: layout [
 				down [
 					append line-array event/offset
 					pen-buffer/argb: transparent
-					draw pen-buffer replaces copy [
-						pen	       a1
+					draw pen-buffer compose [
+						pen	       (tool/color)
 						fill-pen   off
 						line-join  round
 						line-cap   round
-						line-width a2 
-						line	   a3
-					] [a1 (tool/color) a2 (tool/size) a3 (line-array)]
+						line-width (tool/size) 
+						line	   (line-array)
+					]
 					show pb
 				]
 				alt-down [
@@ -94,7 +86,7 @@ canvas: layout [
 	pb: image pen-buffer
 
 	below center
-	preview: base 150x60
+	preview: base 150x60 on-created [update-preview]
 	pallete: image pallete-buffer 
 		
 		on-down [
@@ -127,8 +119,6 @@ canvas: layout [
 	c-slider data 0.2 react [tool/size: to-integer face/data * 100]
 
 	button "HELP" [view help]
-
-	do [update-preview]
 ]
 
 help: layout [
@@ -144,3 +134,4 @@ help: layout [
 
 view canvas
 
+system/view/auto-sync?: yes
