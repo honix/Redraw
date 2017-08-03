@@ -86,7 +86,7 @@ canvas: layout [
 	pb: image pen-buffer
 
 	below center
-	preview: base 150x60
+	preview: base 150x60 on-created [update-preview]
 	pallete: image pallete-buffer 
 		
 		on-down [
@@ -119,8 +119,6 @@ canvas: layout [
 	c-slider data 0.2 react [tool/size: to-integer face/data * 100]
 
 	button "HELP" [view help]
-
-	do [update-preview]
 ]
 
 help: layout [
