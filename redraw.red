@@ -64,7 +64,9 @@ canvas: layout [
 		all-over
 		on-over [switch first event/flags [
 				down [
-					append line-array event/offset
+					unless find event/flags 'shift [
+						append line-array event/offset
+					]
 					pen-buffer/argb: transparent
 					draw pen-buffer compose [
 						pen	       (tool/color)
@@ -72,7 +74,7 @@ canvas: layout [
 						line-join  round
 						line-cap   round
 						line-width (tool/size) 
-						spline (line-array)
+						spline     (line-array) (event/offset)
 					]
 					show pb
 				]
@@ -117,7 +119,8 @@ canvas: layout [
 
 	label "SIZE"
 	c-slider data 0.2 react [tool/size: to-integer face/data * 100]
-
+	
+	button "CLEAR" [buffer/rgb: 100.100.100 show ib]
 	button "HELP" [view help]
 ]
 
