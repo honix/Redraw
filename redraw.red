@@ -10,7 +10,7 @@ system/view/auto-sync?: no
 pallete-buffer: make image! 150x150
 draw pallete-buffer [
 	pen off
-	fill-pen linear red orange yellow green aqua blue purple
+	fill-pen linear red orange yellow green cyan blue magenta red
 	box 0x0 150x150 
 	fill-pen linear white transparent black 0x0 0x150
 	box 0x0 150x150
@@ -72,7 +72,7 @@ canvas: layout [
 						line-join  round
 						line-cap   round
 						line-width (tool/size) 
-						line	   (line-array)
+						spline (line-array)
 					]
 					show pb
 				]
