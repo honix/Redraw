@@ -3,6 +3,7 @@ Work in progress!
 
 Red [
 	Needs: 'View
+	Tabs:  4
 ]
 
 system/view/auto-sync?: no
@@ -16,16 +17,20 @@ draw pallete-buffer [
 	box 0x0 150x150
 ]
 
-pen-buffer-settings: reduce [500x500 transparent]
-pen-buffer: make image! pen-buffer-settings
-buffer:	 make image! [500x500 100.100.100]
-line-array: []
-
 tool: context [
 	type: 'pen						 ; only pen for now
 	color: 50.0.50.100
 	size: 25
 ]
+
+line-array: []
+
+initiate: func [size] [
+	buffer:     make image! reduce [size 100.100.100]
+	pen-buffer: make image! reduce [size transparent]
+]
+
+initiate 512x512
 
 update-preview: does [
 	preview/draw: compose [
@@ -38,7 +43,6 @@ update-preview: does [
 	]
 	
 	show preview
-	print tool/color
 ]
 
 canvas: layout [
@@ -86,7 +90,26 @@ canvas: layout [
 		]
 
 	pb: image pen-buffer
+]
 
+canvas/menu: ["File" ["New" new "Save" save "Load" load "Quit" quit]]
+
+canvas/actors: context [
+	on-menu: func [face [object!] event [event!]] [
+		switch event/picked [
+			new  [
+				unview/all
+				initiate 512x512
+				new-session
+			]
+			save [print "Save not implemented yet!"]
+			load [print "Load not implemented yet!"]
+			quit [unview/all]
+		]
+	]
+]
+
+tool-bar: layout [
 	below center
 	preview: base 150x60 on-created [update-preview]
 	pallete: image pallete-buffer 
@@ -141,6 +164,15 @@ help: layout [
 	button "Close" [unview self]
 ]
 
-view canvas
+new-session: does [
+	canvas-window: view/no-wait canvas
+	view/options tool-bar [offset: canvas-window/offset - 200x0]
+
+	canvas/pane/1/image: buffer
+	canvas/pane/2/image: pen-buffer
+	show cansas/pane/1                  ;?
+]
+
+new-session
 
 system/view/auto-sync?: yes
