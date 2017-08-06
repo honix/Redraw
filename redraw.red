@@ -8,14 +8,6 @@ Red [
 
 system/view/auto-sync?: no
 
-pallete-buffer: make image! 150x150
-draw pallete-buffer [
-	pen off
-	fill-pen linear red orange yellow green cyan blue magenta red
-	box 0x0 150x150 
-	fill-pen linear white transparent black 0x0 0x150
-	box 0x0 150x150
-]
 
 tool: context [
 	type: 'pen						 ; only pen for now
@@ -28,6 +20,14 @@ line-array: []
 initiate: func [size] [
 	buffer:     make image! reduce [size 100.100.100]
 	pen-buffer: make image! reduce [size transparent]
+	pallete-buffer: make image! 150x150
+	draw pallete-buffer [
+		pen off
+		fill-pen linear red orange yellow green cyan blue magenta red
+		box 0x0 150x150 
+		fill-pen linear white transparent black 0x0 0x150
+		box 0x0 150x150
+	]
 ]
 
 initiate 512x512
@@ -45,71 +45,9 @@ update-preview: does [
 	show preview
 ]
 
-canvas: layout [
-	title "Redraw"
-
-	at 10x10 
-	ib: image buffer
-
-		on-down [append line-array event/offset]
-
-		on-alt-down [
-			tool/color: pick buffer event/offset
-			update-preview
-		]
-
-		on-up [
-			line-array: copy []
-			draw buffer [image pen-buffer]
-			pen-buffer/argb: transparent
-			show [ib pb]
-		]
-	
-		all-over
-		on-over [switch first event/flags [
-				down [
-					unless find event/flags 'shift [
-						append line-array event/offset
-					]
-					pen-buffer/argb: transparent
-					draw pen-buffer compose [
-						pen	       (tool/color)
-						fill-pen   off
-						line-join  round
-						line-cap   round
-						line-width (tool/size) 
-						spline     (line-array) (event/offset)
-					]
-					show pb
-				]
-				alt-down [
-					tool/color: pick buffer event/offset
-					update-preview
-				]
-			]
-		]
-
-	pb: image pen-buffer
-]
-
-canvas/menu: ["File" ["New" new "Save" save "Load" load "Quit" quit]]
-
-canvas/actors: context [
-	on-menu: func [face [object!] event [event!]] [
-		switch event/picked [
-			new  [
-				unview/all
-				initiate 512x512
-				new-session
-			]
-			save [print "Save not implemented yet!"]
-			load [print "Load not implemented yet!"]
-			quit [unview/all]
-		]
-	]
-]
-
 tool-bar: layout [
+	title "Tool-bar"
+
 	below center
 	preview: base 150x60 on-created [update-preview]
 	pallete: image pallete-buffer 
@@ -164,13 +102,90 @@ help: layout [
 	button "Close" [unview self]
 ]
 
+new-file: layout [
+	title "New file"
+
+	f: field "512x512" return
+	button "Create" [
+		either pair? do f/data [
+			unview/all
+			initiate do f/data
+			new-session
+		] [
+			f/text: "512x512"
+			show f
+		]
+	]
+	button "Cancel" [unview]
+]
+
 new-session: does [
+	comment [Here we need to recreate canvas layout for new size]
+	canvas: layout [
+		title "Redraw"
+	
+		at 10x10
+		ib: image buffer
+	
+			on-down [append line-array event/offset]
+	
+			on-alt-down [
+				tool/color: pick buffer event/offset
+				update-preview
+			]
+	
+			on-up [
+				line-array: copy []
+				draw buffer [image pen-buffer]
+				pen-buffer/argb: transparent
+				show [ib pb]
+			]
+		
+			all-over
+			on-over [switch first event/flags [
+					down [
+						unless find event/flags 'shift [
+							append line-array event/offset
+						]
+						pen-buffer/argb: transparent
+						draw pen-buffer compose [
+							pen	       (tool/color)
+							fill-pen   off
+							line-join  round
+							line-cap   round
+							line-width (tool/size) 
+							spline     (line-array) (event/offset)
+						]
+						show pb
+					]
+					alt-down [
+						tool/color: pick buffer event/offset
+						update-preview
+					]
+				]
+			]
+	
+		pb: image pen-buffer
+	]
+
+	canvas/menu: [
+		"File"
+		["New" new "Save" save "Load" load "Quit" quit]
+	]
+	
+	canvas/actors: context [
+		on-menu: func [face [object!] event [event!]] [
+			switch event/picked [
+				new  [view new-file]
+				save [print "Save not implemented yet!"]
+				load [print "Load not implemented yet!"]
+				quit [unview/all]
+			]
+		]
+	]
+
 	canvas-window: view/no-wait canvas
 	view/options tool-bar [offset: canvas-window/offset - 200x0]
-
-	canvas/pane/1/image: buffer
-	canvas/pane/2/image: pen-buffer
-	show cansas/pane/1                  ;?
 ]
 
 new-session
