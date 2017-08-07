@@ -28,6 +28,26 @@ initiate: func [size] [
 		fill-pen linear white transparent black 0x0 0x150
 		box 0x0 150x150
 	]
+	back-pattern: make image! reduce [size 160.160.160]
+	draw back-pattern compose [
+		pen off
+		fill-pen pattern 20x20 [
+			pen off
+			fill-pen 200.200.200 
+			box 0x0   10x10
+			box 10x10 20x20
+		]
+		box 0x0 (size)
+	]
+	main-buffer: make image! size
+]
+
+redraw: does [
+	draw main-buffer [
+		image back-pattern
+		image buffer
+		image pen-buffer
+	]
 ]
 
 initiate 512x512
@@ -80,13 +100,11 @@ tool-bar: layout [
 
 	label "SIZE"
 	c-slider data 0.2 react [tool/size: to-integer face/data * 100]
-	
-	button "CLEAR" [buffer/rgb: 100.100.100 show ib]
-	button "HELP" [view help]
 ]
 
 help: layout [
 	title "Help"
+
 	below center
 	panel 200.200.200 [
 		text "Draw with current tool"
@@ -104,7 +122,8 @@ help: layout [
 
 new-file: layout [
 	title "New file"
-
+	
+	text "New file size:"
 	f: field "512x512" return
 	button "Create" [
 		either pair? do f/data [
@@ -119,58 +138,63 @@ new-file: layout [
 	button "Cancel" [unview]
 ]
 
+pick-color: func [offset][
+	tool/color: pick buffer offset
+	update-preview
+]
+
 new-session: does [
 	comment [Here we need to recreate canvas layout for new size]
 	canvas: layout [
 		title "Redraw"
 	
-		at 10x10
-		ib: image buffer
+		canvas-buffer: image main-buffer
+
+		on-create [redraw]
+				
+		on-down [append line-array event/offset]
 	
-			on-down [append line-array event/offset]
+		on-alt-down [pick-color event/offset]
 	
-			on-alt-down [
-				tool/color: pick buffer event/offset
-				update-preview
-			]
+		on-up [
+			line-array: copy []
+			draw buffer [image pen-buffer]
+			pen-buffer/argb: transparent
+			redraw
+			show face 
+		]
 	
-			on-up [
-				line-array: copy []
-				draw buffer [image pen-buffer]
-				pen-buffer/argb: transparent
-				show [ib pb]
-			]
-		
-			all-over
-			on-over [switch first event/flags [
-					down [
-						unless find event/flags 'shift [
-							append line-array event/offset
-						]
-						pen-buffer/argb: transparent
-						draw pen-buffer compose [
-							pen	       (tool/color)
-							fill-pen   off
-							line-join  round
-							line-cap   round
-							line-width (tool/size) 
-							spline     (line-array) (event/offset)
-						]
-						show pb
+		all-over
+		on-over [switch first event/flags [
+				down [
+					unless find event/flags 'shift [
+						append line-array event/offset
 					]
-					alt-down [
-						tool/color: pick buffer event/offset
-						update-preview
+					pen-buffer/argb: transparent
+					draw pen-buffer compose [
+						pen	       (tool/color)
+						fill-pen   off
+						line-join  round
+						line-cap   round
+						line-width (tool/size) 
+						spline     (line-array) (event/offset)
 					]
+					redraw
+					show face
 				]
+				alt-down [pick-color event/offset]
 			]
+		]
 	
-		pb: image pen-buffer
 	]
 
 	canvas/menu: [
 		"File"
-		["New" new "Save" save "Load" load "Quit" quit]
+		["New" new "* Save" save "* Load" load "Quit" quit]
+		"Image"
+		["Fill with color" fill]
+		"Help"
+		["Usage" usage "* About" about]
 	]
 	
 	canvas/actors: context [
@@ -180,6 +204,10 @@ new-session: does [
 				save [print "Save not implemented yet!"]
 				load [print "Load not implemented yet!"]
 				quit [unview/all]
+
+				fill [buffer/argb: tool/color redraw show canvas-buffer]
+				usage [view help]
+				about [print "About not implemented yet!"]
 			]
 		]
 	]
@@ -191,3 +219,4 @@ new-session: does [
 new-session
 
 system/view/auto-sync?: yes
+
