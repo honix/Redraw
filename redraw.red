@@ -72,6 +72,11 @@ update-preview: does [
 	show preview
 ]
 
+pick-color: func [buffer offset][
+	tool/color: pick buffer offset
+	update-preview
+]
+
 tool-bar: layout [
 	title "Tool-bar"
 
@@ -79,17 +84,11 @@ tool-bar: layout [
 	preview: base 150x60 on-created [update-preview]
 	pallete: image pallete-buffer 
 		
-		on-down [
-			tool/color: pick pallete-buffer event/offset
-			update-preview
-		]
+		on-down [pick-color pallete-buffer event/offset]
 
 		all-over
 		on-over [switch first event/flags [
-				down [
-					tool/color: pick pallete-buffer event/offset
-					update-preview
-				]
+				down [pick-color pallete-buffer event/offset]
 			]
 		]
 
@@ -144,11 +143,6 @@ new-file: layout [
 	button "Cancel" [unview]
 ]
 
-pick-color: func [offset][
-	tool/color: pick buffer offset
-	update-preview
-]
-
 new-session: does [
 	comment [Here we need to recreate canvas layout for new size]
 	canvas: layout [
@@ -160,7 +154,7 @@ new-session: does [
 					
 			on-down [append line-array event/offset]
 	
-			on-alt-down [pick-color event/offset]
+			on-alt-down [pick-color buffer event/offset]
 	
 			on-up [
 				line-array: copy []
@@ -188,7 +182,7 @@ new-session: does [
 						redraw
 						show face
 					]
-					alt-down [pick-color event/offset]
+					alt-down [pick-color buffer event/offset]
 				]
 			]
 	
