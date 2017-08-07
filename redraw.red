@@ -17,9 +17,14 @@ tool: context [
 
 line-array: []
 
+preview: none                        ; for successful compilation
+canvas-buffer: none
+
 initiate: func [size] [
 	buffer:     make image! reduce [size 100.100.100]
+
 	pen-buffer: make image! reduce [size transparent]
+
 	pallete-buffer: make image! 150x150
 	draw pallete-buffer [
 		pen off
@@ -28,6 +33,7 @@ initiate: func [size] [
 		fill-pen linear white transparent black 0x0 0x150
 		box 0x0 150x150
 	]
+
 	back-pattern: make image! reduce [size 160.160.160]
 	draw back-pattern compose [
 		pen off
@@ -39,18 +45,19 @@ initiate: func [size] [
 		]
 		box 0x0 (size)
 	]
+
 	main-buffer: make image! size
 ]
 
+initiate 512x512
+
 redraw: does [
-	draw main-buffer [
+	draw main-buffer [               ; this technique allows us do a layers
 		image back-pattern
 		image buffer
 		image pen-buffer
 	]
 ]
-
-initiate 512x512
 
 update-preview: does [
 	preview/draw: compose [
@@ -76,7 +83,6 @@ tool-bar: layout [
 			tool/color: pick pallete-buffer event/offset
 			update-preview
 		]
-
 
 		all-over
 		on-over [switch first event/flags [
@@ -150,41 +156,41 @@ new-session: does [
 	
 		canvas-buffer: image main-buffer
 
-		on-create [redraw]
-				
-		on-down [append line-array event/offset]
+			on-create [redraw]
+					
+			on-down [append line-array event/offset]
 	
-		on-alt-down [pick-color event/offset]
+			on-alt-down [pick-color event/offset]
 	
-		on-up [
-			line-array: copy []
-			draw buffer [image pen-buffer]
-			pen-buffer/argb: transparent
-			redraw
-			show face 
-		]
-	
-		all-over
-		on-over [switch first event/flags [
-				down [
-					unless find event/flags 'shift [
-						append line-array event/offset
-					]
-					pen-buffer/argb: transparent
-					draw pen-buffer compose [
-						pen	       (tool/color)
-						fill-pen   off
-						line-join  round
-						line-cap   round
-						line-width (tool/size) 
-						spline     (line-array) (event/offset)
-					]
-					redraw
-					show face
-				]
-				alt-down [pick-color event/offset]
+			on-up [
+				line-array: copy []
+				draw buffer [image pen-buffer]
+				pen-buffer/argb: transparent
+				redraw
+				show face 
 			]
-		]
+	
+			all-over
+			on-over [switch first event/flags [
+					down [
+						unless find event/flags 'shift [
+							append line-array event/offset
+						]
+						pen-buffer/argb: transparent
+						draw pen-buffer compose [
+							pen	       (tool/color)
+							fill-pen   off
+							line-join  round
+							line-cap   round
+							line-width (tool/size) 
+							spline     (line-array) (event/offset)
+						]
+						redraw
+						show face
+					]
+					alt-down [pick-color event/offset]
+				]
+			]
 	
 	]
 
