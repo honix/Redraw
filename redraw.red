@@ -98,7 +98,6 @@ tool-bar: layout [
 	title "Tool-bar"
 
 	below center
-	preview: base 150x60 on-created [update-preview]
 	pallete: image pallete-buffer on-created [update-pallete]
 		
 		on-down [pick-color pallete-buffer event/offset]
@@ -109,23 +108,25 @@ tool-bar: layout [
 			]
 		]
 
-	style label: text 60x14 center 
+	style label: text 60x14 center
 	style c-slider: slider all-over on-over [
 		if find event/flags 'down [update-preview]
 	]
 
-	label "Saturation"
 	slider data 1.0 all-over on-over [update-pallete] react [
 		tool/saturation: to-integer face/data * 255
 	]
+	label "Saturation"
 
-	label "Alpha"
+	base 150x1
+
+	preview: base 150x60 on-created [update-preview]
+
 	c-slider data 0.2 react [tool/color/4: to-integer face/data * 255]
+	label "Alpha"
 
-	base 120x1
-
-	label "Size"
 	c-slider data 0.2 react [tool/size: to-integer face/data * 100]
+	label "Size"
 ]
 
 help: layout [
