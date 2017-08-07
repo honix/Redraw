@@ -9,3 +9,13 @@ Run your [Red console](http://www.red-lang.org/p/download.html) and type:
 ```do https://raw.githubusercontent.com/honix/Redraw/master/redraw.red```
 
 this will start Redraw on your machine. Have fun!
+
+### Tests
+Redraw works fine on:
+- Windows 8.1
+- Windows 7
+
+Redraw works, but weakly on:
+- [Wine 2.9](https://www.winehq.org/)
+
+Please test Redraw on other platforms and send me a result!
