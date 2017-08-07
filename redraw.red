@@ -72,6 +72,7 @@ update-pallete: does [
 		fill-pen linear white transparent black 0x0 0x150
 		box 0x0 150x150
 	]
+	pallete/image: pallete-buffer
 	show pallete
 ]
 
