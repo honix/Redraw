@@ -12,27 +12,20 @@ system/view/auto-sync?: no
 tool: context [
 	type: 'pen						 ; only pen for now
 	color: 50.0.50.100
+	saturation: 255
 	size: 25
 ]
 
 line-array: []
 
 preview: none                        ; for successful compilation
+pallete: none
 canvas-buffer: none
 
 initiate: func [size] [
 	buffer:     make image! reduce [size 100.100.100]
 
 	pen-buffer: make image! reduce [size transparent]
-
-	pallete-buffer: make image! 150x150
-	draw pallete-buffer [
-		pen off
-		fill-pen linear red orange yellow green cyan blue magenta red
-		box 0x0 150x150 
-		fill-pen linear white transparent black 0x0 0x150
-		box 0x0 150x150
-	]
 
 	back-pattern: make image! reduce [size 160.160.160]
 	draw back-pattern compose [
@@ -46,6 +39,8 @@ initiate: func [size] [
 		box 0x0 (size)
 	]
 
+	pallete-buffer: make image! 150x150
+
 	main-buffer: make image! size
 ]
 
@@ -57,6 +52,27 @@ redraw: does [
 		image buffer
 		image pen-buffer
 	]
+	show canvas-buffer
+]
+
+update-pallete: does [
+	comment [There is a DRAW bug! "fill-pen linear" breaks nexts fill-pens]
+	draw pallete-buffer compose [
+		pen off
+		fill-pen linear red orange yellow green cyan blue magenta red
+		box 0x0 150x150 
+	]
+	draw pallete-buffer compose [
+		pen off
+		fill-pen (gray + make tuple! reduce [0 0 0 tool/saturation])
+		box 0x0 150x150
+	]
+	draw pallete-buffer compose [
+		pen off
+		fill-pen linear white transparent black 0x0 0x150
+		box 0x0 150x150
+	]
+	show pallete
 ]
 
 update-preview: does [
@@ -68,12 +84,13 @@ update-preview: does [
 		line-width (tool/size) 
 		spline 30x30 50x20 100x40 120x30
 	]
-	
 	show preview
 ]
 
 pick-color: func [buffer offset][
+	alpha: tool/color/4
 	tool/color: pick buffer offset
+	tool/color/4: alpha
 	update-preview
 ]
 
@@ -82,7 +99,7 @@ tool-bar: layout [
 
 	below center
 	preview: base 150x60 on-created [update-preview]
-	pallete: image pallete-buffer 
+	pallete: image pallete-buffer on-created [update-pallete]
 		
 		on-down [pick-color pallete-buffer event/offset]
 
@@ -97,13 +114,17 @@ tool-bar: layout [
 		if find event/flags 'down [update-preview]
 	]
 
-	label "ALPHA"
-	c-slider data 0.2
-		react [tool/color/4: to-integer face/data * 255]
+	label "Saturation"
+	slider data 1.0 all-over on-over [update-pallete] react [
+		tool/saturation: to-integer face/data * 255
+	]
+
+	label "Alpha"
+	c-slider data 0.2 react [tool/color/4: to-integer face/data * 255]
 
 	base 120x1
 
-	label "SIZE"
+	label "Size"
 	c-slider data 0.2 react [tool/size: to-integer face/data * 100]
 ]
 
@@ -150,8 +171,6 @@ new-session: does [
 	
 		canvas-buffer: image main-buffer
 
-			on-create [redraw]
-					
 			on-down [append line-array event/offset]
 	
 			on-alt-down [pick-color buffer event/offset]
@@ -161,7 +180,6 @@ new-session: does [
 				draw buffer [image pen-buffer]
 				pen-buffer/argb: transparent
 				redraw
-				show face 
 			]
 	
 			all-over
@@ -180,7 +198,6 @@ new-session: does [
 							spline     (line-array) (event/offset)
 						]
 						redraw
-						show face
 					]
 					alt-down [pick-color buffer event/offset]
 				]
@@ -213,6 +230,7 @@ new-session: does [
 	]
 
 	canvas-window: view/no-wait canvas
+	redraw
 	view/options tool-bar [offset: canvas-window/offset - 200x0]
 ]
 
