@@ -10,11 +10,25 @@ system/view/auto-sync?: no
 
 
 tool: context [
-	type: 'pen						 ; only pen for now
 	color: 50.0.50.100
 	saturation: 255
 	size: 25
+
+	brushes: #()
+	current-brush: none
 ]
+
+foreach brush read %brushes/ [
+	put tool/brushes
+		to-string brush
+		do read make file! reduce [%brushes/ brush]
+]
+
+set-brush: func [name] [
+	tool/current-brush: select tool/brushes name
+]
+
+set-brush "normal.red" 
 
 line-array: []
 
@@ -56,7 +70,7 @@ redraw: does [
 ]
 
 update-pallete: does [
-	comment [There is a DRAW bug! "fill-pen linear" breaks nexts fill-pens]
+	comment [Recode it when 0.6.4 out]
 	draw pallete-buffer compose [
 		pen off
 		fill-pen linear red orange yellow green cyan blue magenta red
@@ -88,7 +102,7 @@ update-preview: does [
 	show preview
 ]
 
-pick-color: func [buffer offset][
+pick-color: func [buffer offset] [
 	alpha: tool/color/4
 	tool/color: pick buffer offset
 	tool/color/4: alpha
@@ -128,6 +142,11 @@ tool-bar: layout [
 
 	c-slider data 0.2 react [tool/size: to-integer face/data * 100]
 	label "Size"
+
+	base 150x1
+	
+	label "Brushes"
+	text-list data keys-of tool/brushes on-change [set-brush pick face/data face/selected]
 ]
 
 help: layout [
@@ -173,38 +192,30 @@ new-session: does [
 	
 		canvas-buffer: image main-buffer
 
-			on-down [append line-array event/offset]
+			on-down [compose bind tool/current-brush/drag 'event]
 	
 			on-alt-down [pick-color buffer event/offset]
 	
 			on-up [
-				line-array: copy []
+				clear line-array
 				draw buffer [image pen-buffer]
 				pen-buffer/argb: transparent
 				redraw
 			]
 	
 			all-over
-			on-over [switch first event/flags [
+			on-over [
+				switch first event/flags [
 					down [
-						unless find event/flags 'shift [
-							append line-array event/offset
-						]
+						unless find event/flags 'shift [do compose bind tool/current-brush/drag 'event]
+
 						pen-buffer/argb: transparent
-						draw pen-buffer compose [
-							pen	       (tool/color)
-							fill-pen   off
-							line-join  round
-							line-cap   round
-							line-width (tool/size) 
-							spline     (line-array) (event/offset)
-						]
+						draw pen-buffer compose bind tool/current-brush/draw 'event
 						redraw
 					]
 					alt-down [pick-color buffer event/offset]
 				]
 			]
-	
 	]
 
 	canvas/menu: [
@@ -227,6 +238,12 @@ new-session: does [
 				fill [buffer/argb: tool/color redraw show canvas-buffer]
 				usage [view help]
 				about [print "About not implemented yet!"]
+			]
+		]
+
+		on-key: func [face [object!] event [event!]] [
+			switch event/key [
+				#"q" [unview/all]
 			]
 		]
 	]
