@@ -18,11 +18,17 @@ tool: context [
 	current-brush: none
 ]
 
-foreach brush read %brushes/ [
-	put tool/brushes
-		to-string brush
-		do read make file! reduce [%brushes/ brush]
+reload-brushes: does [
+	foreach brush read %brushes/ [
+		if parse brush [thru dot "red"] [
+			put tool/brushes
+				to-string brush
+				do read make file! reduce [%brushes/ brush]
+		]
+	]
 ]
+
+reload-brushes
 
 set-brush: func [name] [
 	tool/current-brush: select tool/brushes name
@@ -147,6 +153,8 @@ tool-bar: layout [
 	
 	label "Brushes"
 	text-list data keys-of tool/brushes on-change [set-brush pick face/data face/selected]
+
+	button "Reload brushes" [reload-brushes]
 ]
 
 help: layout [
@@ -209,7 +217,7 @@ new-session: does [
 					down [
 						unless find event/flags 'shift [do compose bind tool/current-brush/drag 'event]
 
-						pen-buffer/argb: transparent
+						if do tool/current-brush/clear [pen-buffer/argb: transparent]
 						draw pen-buffer compose bind tool/current-brush/draw 'event
 						redraw
 					]
@@ -249,11 +257,11 @@ new-session: does [
 	]
 
 	canvas-window: view/no-wait canvas
+	view/options/no-wait tool-bar [offset: canvas-window/offset - 200x0]
 	redraw
-	view/options tool-bar [offset: canvas-window/offset - 200x0]
 ]
 
 new-session
 
-system/view/auto-sync?: yes
+; system/view/auto-sync?: yes
 

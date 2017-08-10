@@ -1,4 +1,4 @@
-[
+context [
 	drag: [
 		append line-array (event/offset)
 	]
@@ -10,5 +10,6 @@
 		line-width (tool/size) 
 		spline     (line-array) (event/offset)
 	]
+	clear: yes
 ]
 
