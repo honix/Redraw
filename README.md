@@ -4,9 +4,7 @@
 Painting app in Red language
 
 ### Try now
-Clone this repo and run your [Red console](http://www.red-lang.org/p/download.html) then type:
-
-```do %redraw.red```
+Clone this repo and run your [Red console](http://www.red-lang.org/p/download.html) then type: ```do %redraw.red```
 
 this will start Redraw on your machine. Have fun!
 
