@@ -1,7 +1,7 @@
 # Redraw
 ![Screenshoot](https://github.com/honix/Redraw/blob/master/screenshoot.png)
 
-Painting app in Red language
+Painting app in Red language with programmable brushes!
 
 ### Try now
 Clone this repo and type in your [Red console](http://www.red-lang.org/p/download.html): ```do %redraw.red```
