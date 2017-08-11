@@ -20,10 +20,10 @@ tool: context [
 
 reload-brushes: does [
 	foreach brush read %brushes/ [
-		if parse brush [thru dot "red"] [
+		if parse brush [to [dot "red"] remove to end] [
 			put tool/brushes
 				to-string brush
-				do read make file! reduce [%brushes/ brush]
+				do read rejoin [%brushes/ brush ".red"]
 		]
 	]
 ]
@@ -34,7 +34,7 @@ set-brush: func [name] [
 	tool/current-brush: select tool/brushes name
 ]
 
-set-brush "normal.red" 
+set-brush "normal"
 
 line-array: []
 
