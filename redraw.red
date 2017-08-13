@@ -257,8 +257,8 @@ new-session: does [
 	]
 
 	canvas-window: view/no-wait canvas
-	view/options tool-bar [offset: canvas-window/offset - 200x0]
 	redraw
+	view/options tool-bar [offset: canvas-window/offset - 200x0]
 ]
 
 new-session
