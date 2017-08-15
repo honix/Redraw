@@ -2,7 +2,7 @@ context [
 	drag: [
 		line-array: copy []
 		repeat i 5 [
-			append line-array 
+			append tool/line-array 
 				(event/offset + as-pair (random 50) - 25 (random 50) - 25)
 		]
 	]
@@ -12,8 +12,8 @@ context [
 		line-join  round
 		line-cap   round
 		line-width (tool/size) 
-		line       (line-array) (event/offset)
+		line       (tool/line-array) (event/offset)
 	]
-	clear: no
+	clear: yes
 ]
 

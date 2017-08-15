@@ -1,10 +1,10 @@
-Drawing app
-Work in progress!
-
 Red [
 	Needs: 'View
 	Tabs:  4
+	About: {Drawing app. Work in progress!}
 ]
+
+#include %utils.red
 
 system/view/auto-sync?: no
 
@@ -14,29 +14,30 @@ tool: context [
 	saturation: 255
 	size: 25
 
+	old-pos: 0x0
+	line-array: []
+
 	brushes: #()
 	current-brush: none
-]
-
-reload-brushes: does [
-	foreach brush read %brushes/ [
-		if parse brush [to [dot "red"] remove to end] [
-			put tool/brushes
-				to-string brush
-				do read rejoin [%brushes/ brush ".red"]
+	
+	reload-brushes: does [
+		foreach brush read %brushes/ [
+			if parse brush [to [dot "red"] remove to end] [
+				put tool/brushes
+					to-string brush
+					do read rejoin [%brushes/ brush ".red"]
+			]
 		]
+	]
+
+	set-brush: func [name] [
+		tool/current-brush: select tool/brushes name
 	]
 ]
 
-reload-brushes
+tool/reload-brushes
 
-set-brush: func [name] [
-	tool/current-brush: select tool/brushes name
-]
-
-set-brush "normal"
-
-line-array: []
+tool/set-brush "normal"
 
 preview: none                        ; for successful compilation
 pallete: none
@@ -60,6 +61,7 @@ initiate: func [size] [
 	]
 
 	pallete-buffer: make image! 150x150
+	preview-buffer: make image! 150x150
 
 	main-buffer: make image! size
 ]
@@ -97,14 +99,15 @@ update-pallete: does [
 ]
 
 update-preview: does [
-	preview/draw: compose [
-		pen        (tool/color)
-		fill-pen   off 
-		line-join  round
-		line-cap   round
-		line-width (tool/size) 
-		spline 30x30 50x20 100x40 120x30
+	preview-buffer/argb: 200.200.200
+	foreach point preview-path [
+		event: compose [offset: (point)]
+		do compose bind tool/current-brush/drag 'event
+		if do tool/current-brush/clear [preview-buffer/argb: 200.200.200]
+		draw preview-buffer compose bind tool/current-brush/draw 'tool
 	]
+	unset 'event
+	clear tool/line-array
 	show preview
 ]
 
@@ -141,20 +144,29 @@ tool-bar: layout [
 
 	base 150x1
 
-	preview: base 150x60 on-created [update-preview]
+	preview: image preview-buffer on-created [update-preview]
 
 	c-slider data 0.2 react [tool/color/4: to-integer face/data * 255]
 	label "Alpha"
 
 	c-slider data 0.2 react [tool/size: to-integer face/data * 100]
 	label "Size"
+]
 
-	base 150x1
-	
+tool-brushes: layout [
+	title "Brushes"
+
+	below center
+
+	style label: text 60x14 center
+
 	label "Brushes"
-	text-list data keys-of tool/brushes on-change [set-brush pick face/data face/selected]
+	text-list data keys-of tool/brushes on-change [
+		tool/set-brush pick face/data face/selected
+		update-preview
+	]
 
-	button "Reload brushes" [reload-brushes]
+	button "Reload brushes" [tool/reload-brushes]
 ]
 
 help: layout [
@@ -200,12 +212,15 @@ new-session: does [
 	
 		canvas-buffer: image main-buffer
 
-			on-down [compose bind tool/current-brush/drag 'event]
+			on-down [
+				tool/old-pos: event/offset
+				compose bind tool/current-brush/drag 'event
+			]
 	
 			on-alt-down [pick-color buffer event/offset]
 	
 			on-up [
-				clear line-array
+				clear tool/line-array
 				draw buffer [image pen-buffer]
 				pen-buffer/argb: transparent
 				redraw
@@ -215,7 +230,9 @@ new-session: does [
 			on-over [
 				switch first event/flags [
 					down [
-						unless find event/flags 'shift [do compose bind tool/current-brush/drag 'event]
+						unless find event/flags 'shift [
+							do compose bind tool/current-brush/drag 'event
+						]
 
 						if do tool/current-brush/clear [pen-buffer/argb: transparent]
 						draw pen-buffer compose bind tool/current-brush/draw 'event
@@ -258,7 +275,8 @@ new-session: does [
 
 	canvas-window: view/no-wait canvas
 	redraw
-	view/options tool-bar [offset: canvas-window/offset - 200x0]
+	tool-window: view/options/no-wait tool-bar [offset: canvas-window/offset - 200x0]
+	view/options tool-brushes [offset: tool-window/offset - 150x0]
 ]
 
 new-session

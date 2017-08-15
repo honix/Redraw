@@ -2,7 +2,7 @@ context [
 	blk: none
 
 	drag: [
-		append line-array event/offset
+		append tool/line-array event/offset
 	]
 	draw: [
 		pen	       (tool/color)
@@ -12,7 +12,9 @@ context [
 		line-width (tool/size) 
 		(
 			blk: copy []
-			foreach point line-array [append blk compose [line (point) (event/offset)]]
+			foreach point tool/line-array [
+				append blk compose [line (point) (event/offset)]
+			]
 			blk
 		)
 	]

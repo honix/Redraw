@@ -1,6 +1,6 @@
 context [
 	drag: [
-		append line-array (event/offset)
+		append tool/line-array event/offset
 	]
 	draw: [
 		pen	       (tool/color)
@@ -8,7 +8,7 @@ context [
 		line-join  round
 		line-cap   round
 		line-width (tool/size) 
-		spline     (line-array) (event/offset)
+		spline     (tool/line-array) (event/offset)
 	]
 	clear: yes
 ]

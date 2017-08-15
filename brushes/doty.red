@@ -1,11 +1,10 @@
 context [
 	blk: none
 	dist: none
-	old-pos: none
 
 	drag: [
 		line-array: copy []
-		append line-array event/offset
+		append tool/line-array event/offset
 	]
 	draw: [
 		pen	       (tool/color)
@@ -14,11 +13,10 @@ context [
 		line-cap   round
 		line-width (tool/size) 
 		(
-			unless old-pos [old-pos: event/offset]
-			dist: sqrt add power (event/offset/x - old-pos/x) 2 
-						   power (event/offset/y - old-pos/y) 2 
+			dist: sqrt add power (event/offset/x - tool/old-pos/x) 2 
+						   power (event/offset/y - tool/old-pos/y) 2 
 			either dist > (tool/size * 2) [
-				old-pos: event/offset
+				tool/old-pos: event/offset
 				compose [
 					arc (event/offset) 
 						(as-pair tool/size tool/size) 

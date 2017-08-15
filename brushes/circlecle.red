@@ -3,7 +3,7 @@ context [
 	dist: none
 
 	drag: [
-		append line-array event/offset
+		append tool/line-array event/offset
 	]
 	draw: [
 		pen	       (tool/color)
@@ -13,7 +13,7 @@ context [
 		line-width (tool/size) 
 		(
 			blk: copy []
-			foreach point line-array [
+			foreach point tool/line-array [
 				dist: sqrt add power (event/offset/x - point/x) 2 
 							   power (event/offset/y - point/y) 2 
 				append blk compose [arc (event/offset) (as-pair dist dist) 0 360]
