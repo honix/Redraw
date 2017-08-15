@@ -8,6 +8,9 @@ Red [
 
 system/view/auto-sync?: no
 
+preview: none                        ; for successful compilation
+pallete: none
+canvas-buffer: none
 
 tool: context [
 	color: 50.0.50.100
@@ -38,10 +41,6 @@ tool: context [
 tool/reload-brushes
 
 tool/set-brush "normal"
-
-preview: none                        ; for successful compilation
-pallete: none
-canvas-buffer: none
 
 initiate: func [size] [
 	buffer:     make image! reduce [size 100.100.100]

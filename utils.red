@@ -9,7 +9,7 @@ let: func [
 	/local 
 		ctx
 ][
-	ctx: context append append binds copy [result: do] reduce [block]
+	ctx: context append/only append binds copy [result: do] block
 	; print mold ctx
 	select ctx 'result
 ]
@@ -42,14 +42,14 @@ bezier: func [points t] [
 
 preview-path: let [
 	points: [30x75 50x-50 100x200 120x75]
-	blk: copy []
 	t: 0.0
-][ 	
-	until [
-		append blk bezier points t
-		t: t + 0.07
-		t > 1.01
+][ 
+	collect [
+		until [
+			keep bezier points t
+			t: t + 0.07
+			t > 1.01
+		]
 	]
-	blk
 ]
 
