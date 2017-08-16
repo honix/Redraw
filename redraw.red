@@ -107,6 +107,8 @@ update-preview: does [
 	]
 	unset 'event
 	clear tool/line-array
+
+	preview/image: preview-buffer
 	show preview
 ]
 
