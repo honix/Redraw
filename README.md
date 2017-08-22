@@ -1,5 +1,5 @@
 # Redraw
-![Screenshoot](https://github.com/honix/Redraw/blob/master/screenshoot.png)
+![Screenshoot](https://github.com/honix/Redraw/blob/master/SCREENSHOT.png)
 
 Painting app in Red language with programmable brushes!
 
