@@ -1,6 +1,6 @@
 Red [
+	Title: "Utils for Redraw"
 	Tabs: 4
-	About: {Utils for Redraw}
 ]
 
 let: func [
@@ -10,7 +10,7 @@ let: func [
 		ctx
 ][
 	ctx: context append/only append binds copy [result: do] block
-	; print mold ctx
+	; probe ctx
 	select ctx 'result
 ]
 
@@ -51,5 +51,12 @@ preview-path: let [
 			t > 1.01
 		]
 	]
+]
+
+pick-color: func [buffer offset] [
+	alpha: tool/color/4
+	tool/color: pick buffer offset
+	tool/color/4: alpha
+	update-preview
 ]
 
